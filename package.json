@@ -16,11 +16,14 @@
       {
         "command": "slide-wysiwyg.helloWorld",
         "title": "Hello World"
-      }
-      ,
+      },
       {
         "command": "slide-wysiwyg.openWebview",
         "title": "Open Slide WYSIWYG Webview"
+      },
+      {
+        "command": "slide-wysiwyg.createSlideHtml",
+        "title": "新規スライドHTML作成"
       }
     ]
   },
