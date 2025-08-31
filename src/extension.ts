@@ -2,10 +2,46 @@
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
 import { SlideWysiwygPanel } from './panel';
+import { aiPromptTemplates } from './aiPrompts';
 
 // This method is called when your extension is activated
 // Your extension is activated the very first time the command is executed
 export function activate(context: vscode.ExtensionContext) {
+	// AIプロンプト支援コマンド
+	const aiPromptDisposable = vscode.commands.registerCommand('slide-wysiwyg.aiPromptSupport', async () => {
+		// クイックピックでテンプレート選択
+		const items = aiPromptTemplates.map(t => ({
+			label: t.label,
+			description: t.description,
+			template: t.template
+		}));
+		const picked = await vscode.window.showQuickPick(items, {
+			placeHolder: 'AIプロンプトテンプレートを選択してください',
+			matchOnDescription: true
+		});
+			if (!picked) {
+				return;
+			}
+		// 選択中テキストを取得
+		const editor = vscode.window.activeTextEditor;
+		let selection = '';
+		if (editor && !editor.selection.isEmpty) {
+			selection = editor.document.getText(editor.selection);
+		}
+		// テンプレートに挿入
+		const prompt = picked.template.replace('{selection}', selection || '');
+		// クリップボードにコピー
+		await vscode.env.clipboard.writeText(prompt);
+		vscode.window.showInformationMessage('AIプロンプトをクリップボードにコピーしました');
+		// Agent Chatパネル自動起動（APIが許せば）
+		// Copilot Chat拡張のコマンドID例: github.copilot-chat.open
+		try {
+			await vscode.commands.executeCommand('github.copilot-chat.open');
+		} catch (e) {
+			// コマンド未登録等は無視
+		}
+	});
+	context.subscriptions.push(aiPromptDisposable);
 
 	// Use the console to output diagnostic information (console.log) and errors (console.error)
 	// This line of code will only be executed once when your extension is activated
